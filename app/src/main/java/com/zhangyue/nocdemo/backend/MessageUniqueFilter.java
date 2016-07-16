@@ -4,7 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.Preference;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -15,7 +18,9 @@ import java.util.TreeSet;
 public class MessageUniqueFilter {
 
     private Context context;
-    private SortedSet<Long> ids;
+    private Set<Long> uniqueIds;
+    private LinkedList<Long> ids;
+    private final static int MAX_ITEMS = 20;
 
     public MessageUniqueFilter(Context context) {
         this.context = context;
@@ -23,17 +28,24 @@ public class MessageUniqueFilter {
 
     public void load() {
         if(ids == null) {
-            ids = new TreeSet<>();
+            ids = new LinkedList<>();
+            uniqueIds = new HashSet<>();
             SharedPreferences pref = context.getSharedPreferences("nocket_msg_ids", Context.MODE_PRIVATE);
             for(String id:pref.getStringSet("ids", new HashSet<String>())) {
                 ids.add(Long.parseLong(id));
+                uniqueIds.add(Long.parseLong(id));
             }
         }
     }
 
     public boolean add(Long id) {
-        boolean fresh = ids.add(id);
+        boolean fresh = uniqueIds.add(id);
         if(fresh) {
+            if(ids.size() > MAX_ITEMS) {
+                long deletedId = ids.removeFirst();
+                uniqueIds.remove(deletedId);
+            }
+            ids.add(id);
             Set<String> raws = new HashSet<>();
             for(Long s: ids) {
                 raws.add(s.toString());
