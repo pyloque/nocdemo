@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     unbindService(conn);
                     presenter.getModel().setStopped(true);
+                    presenter.getModel().setSwitchText("Start");
                     presenter.reload();
                 }
             }
