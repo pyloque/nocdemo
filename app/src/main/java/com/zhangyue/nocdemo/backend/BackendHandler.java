@@ -26,7 +26,7 @@ public class BackendHandler extends Handler {
     public void handleMessage(Message msg) {
         switch(msg.what) {
             case Opcode.CONNECT_SERVER:
-                door = new Nocdor(meta.getHost(), meta.getPort(), new IdemoTokenFetcher());
+                door = new Nocdor(meta.getHost(), meta.getPort(), new IdemoTokenFetcher(context));
                 door.user(meta.getPlatformId(), meta.getProductId(), meta.getUserId())
                         .deviceId(meta.getDeviceId())
                         .vcp(meta.getVersionId(), meta.getChannelId(), meta.getPhoneModel())

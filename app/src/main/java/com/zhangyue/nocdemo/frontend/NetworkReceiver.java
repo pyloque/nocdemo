@@ -18,11 +18,11 @@ import nocket.door.Nocdor;
  * Created by pyloque on 16/7/15.
  */
 public class NetworkReceiver extends BroadcastReceiver {
-    private AppState appState;
+    private DemoModel model;
     private NocdorConnection conn;
 
-    public NetworkReceiver(AppState appState, NocdorConnection conn) {
-        this.appState = appState;
+    public NetworkReceiver(DemoModel model, NocdorConnection conn) {
+        this.model = model;
         this.conn = conn;
     }
 
@@ -33,9 +33,9 @@ public class NetworkReceiver extends BroadcastReceiver {
         if(action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
             if(Helpers.isNetworkActive(context)) {
                 intent = new Intent(context, NocdorService.class);
-                intent.putExtra("user_id", appState.getUserId());
-                intent.putExtra("channel_id", appState.getChannelId());
-                intent.putExtra("version_id", appState.getVersionId());
+                intent.putExtra("user_id", model.getUserId());
+                intent.putExtra("channel_id", model.getChannelId());
+                intent.putExtra("version_id", model.getVersionId());
                 context.bindService(intent, conn, Context.BIND_AUTO_CREATE);
             } else {
                 context.unbindService(conn);

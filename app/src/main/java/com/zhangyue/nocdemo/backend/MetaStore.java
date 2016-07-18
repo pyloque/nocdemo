@@ -8,6 +8,8 @@ import android.os.Bundle;
 
 import com.zhangyue.nocdemo.Helpers;
 
+import nocket.door.TokenTuple;
+
 /**
  * Created by pyloque on 16/7/15.
  */
@@ -16,6 +18,7 @@ public class MetaStore {
     private Context context;
     private long deviceId;
     private long token;
+    private long tokenExpireTs;
     private int platformId;
     private String productId;
     private String channelId;
@@ -86,6 +89,14 @@ public class MetaStore {
         this.token = token;
     }
 
+    public long getTokenExpireTs() {
+        return tokenExpireTs;
+    }
+
+    public void setTokenExpireTs(long tokenExpireTs) {
+        this.tokenExpireTs = tokenExpireTs;
+    }
+
     private void loadMeta() {
         try {
             ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
@@ -96,7 +107,6 @@ public class MetaStore {
             productId = meta.getString("zhangyue.nocdor.product_id");
             phoneModel = Helpers.getPhoneModel();
         } catch (PackageManager.NameNotFoundException e) {
-
         }
     }
 
@@ -105,12 +115,19 @@ public class MetaStore {
         SharedPreferences.Editor editor = pref.edit();
         editor.putLong("device_id", deviceId);
         editor.putLong("token", token);
+        editor.putLong("token_expire_ts", tokenExpireTs);
         editor.commit();
     }
 
     public void load() {
         SharedPreferences pref = context.getSharedPreferences("nocket", Context.MODE_PRIVATE);
         deviceId = pref.getLong("device_id", 0);
-        token = pref.getLong("token", 0);
+        long token = pref.getLong("token", 0);
+        long expireTs = pref.getLong("token_expire_ts", 0);
+        long now = System.currentTimeMillis() / 1000;
+        if(token > 0 && expireTs > now) {
+            this.token = token;
+            this.tokenExpireTs = expireTs;
+        }
     }
 }

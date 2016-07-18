@@ -40,6 +40,9 @@ public class DemoPresenter {
         }
         view.getBtnSwitch().setText(model.getSwitchText());
         view.getTxtState().setText(model.getStateText());
+        view.getEditUserId().setText(model.getUserId());
+        view.getEditChannelId().setText(model.getChannelId());
+        view.getEditVersionId().setText(model.getVersionId());
     }
 
     public boolean isStopped() {

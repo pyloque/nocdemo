@@ -15,6 +15,7 @@ import java.util.Set;
 
 import nocket.door.INocketListener;
 import nocket.door.MessageInfo;
+import nocket.door.TokenTuple;
 
 /**
  * Created by pyloque on 16/7/15.
@@ -39,8 +40,9 @@ public class NocketStateListener implements INocketListener {
     }
 
     @Override
-    public void onNewToken(long token) {
-        meta.setToken(token);
+    public void onNewToken(TokenTuple token) {
+        meta.setToken(token.getToken());
+        meta.setTokenExpireTs(System.currentTimeMillis()/ 1000 + token.getTtl());
         meta.save();
     }
 

@@ -30,7 +30,7 @@
 
         <meta-data
             android:name="zhangyue.nocdor.host"
-            android:value="192.168.31.102" />
+            android:value="192.168.40.79" />
         <meta-data
             android:name="zhangyue.nocdor.port"
             android:value="8080" />

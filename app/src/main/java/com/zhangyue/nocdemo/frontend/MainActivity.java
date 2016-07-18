@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Messenger;
+import android.renderscript.ScriptGroup;
+import android.text.InputType;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.zhangyue.nocdemo.Helpers;
@@ -34,7 +37,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private NetworkReceiver networkReceiver;
-    private AppState appState = new AppState();
+    private boolean editing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +57,12 @@ public class MainActivity extends AppCompatActivity
 
         Button btnSwitch = (Button)findViewById(R.id.btn_switch);
         TextView txtState = (TextView)findViewById(R.id.txt_state);
+        final EditText editUserId = (EditText)findViewById(R.id.edit_user_id);
+        final EditText editChannelId = (EditText)findViewById(R.id.edit_channel_id);
+        final EditText editVersionId = (EditText)findViewById(R.id.edit_version_id);
+        final Button btnEdit = (Button)findViewById(R.id.btn_edit);
 
-        final DemoPresenter presenter = new DemoPresenter(new DemoView(btnSwitch, txtState), new DemoModel());
+        final DemoPresenter presenter = new DemoPresenter(new DemoView(btnSwitch, txtState, editUserId, editChannelId,editVersionId), new DemoModel());
         presenter.reload();
 
         INocdorListener listener = new NocdorStateListener(presenter);
@@ -68,9 +75,10 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 if(presenter.isStopped()) {
                     Intent intent = new Intent(MainActivity.this, NocdorService.class);
-                    intent.putExtra("user_id", appState.getUserId());
-                    intent.putExtra("channel_id", appState.getChannelId());
-                    intent.putExtra("version_id", appState.getVersionId());
+                    DemoModel model = presenter.getModel();
+                    intent.putExtra("user_id", model.getUserId());
+                    intent.putExtra("channel_id", model.getChannelId());
+                    intent.putExtra("version_id", model.getVersionId());
                     bindService(intent,conn , Context.BIND_AUTO_CREATE);
                 } else {
                     unbindService(conn);
@@ -81,9 +89,41 @@ public class MainActivity extends AppCompatActivity
             }
 
         });
+
+        btnEdit.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                if(!editing) {
+                    editing = true;
+                    btnEdit.setText("Commit");
+                    btnEdit.setBackgroundColor(Color.RED);
+                    editUserId.setInputType(InputType.TYPE_CLASS_TEXT);
+                    editChannelId.setInputType(InputType.TYPE_CLASS_TEXT);
+                    editVersionId.setInputType(InputType.TYPE_CLASS_TEXT);
+                } else {
+                    editing = false;
+                    btnEdit.setText("Edit");
+                    btnEdit.setBackgroundColor(Color.BLUE);
+                    editUserId.setInputType(InputType.TYPE_NULL);
+                    editChannelId.setInputType(InputType.TYPE_NULL);
+                    editVersionId.setInputType(InputType.TYPE_NULL);
+                    DemoModel model = presenter.getModel();
+                    if(editUserId.getText().toString().equals(model.getUserId())
+                            && editChannelId.getText().toString().equals(model.getChannelId())
+                            && editVersionId.getText().toString().equals(model.getVersionId())) {
+                        return;
+                    }
+                    model.setUserId(editUserId.getText().toString());
+                    model.setChannelId(editChannelId.getText().toString());
+                    model.setVersionId(editVersionId.getText().toString());
+                }
+            }
+        });
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        networkReceiver = new NetworkReceiver(appState, conn);
+        networkReceiver = new NetworkReceiver(presenter.getModel(), conn);
         registerReceiver(networkReceiver, filter);
     }
 
