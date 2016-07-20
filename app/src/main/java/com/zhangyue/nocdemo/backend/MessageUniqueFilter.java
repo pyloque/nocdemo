@@ -12,10 +12,13 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import nocket.door.IMessageFilter;
+import nocket.door.MessageInfo;
+
 /**
  * Created by pyloque on 16/7/16.
  */
-public class MessageUniqueFilter {
+public class MessageUniqueFilter implements IMessageFilter{
 
     private Context context;
     private Set<Long> uniqueIds;
@@ -38,14 +41,14 @@ public class MessageUniqueFilter {
         }
     }
 
-    public boolean add(Long id) {
-        boolean fresh = uniqueIds.add(id);
+    public boolean add(MessageInfo message) {
+        boolean fresh = uniqueIds.add(message.getId());
         if(fresh) {
             if(ids.size() > MAX_ITEMS) {
                 long deletedId = ids.removeFirst();
                 uniqueIds.remove(deletedId);
             }
-            ids.add(id);
+            ids.add(message.getId());
             Set<String> raws = new HashSet<>();
             for(Long s: ids) {
                 raws.add(s.toString());
@@ -53,7 +56,7 @@ public class MessageUniqueFilter {
             SharedPreferences pref = context.getSharedPreferences("nocket_msg_ids", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
             editor.putStringSet("ids", raws);
-            editor.commit();
+            editor.apply();
         }
         return fresh;
     }

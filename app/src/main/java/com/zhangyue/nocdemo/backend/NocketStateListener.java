@@ -42,7 +42,7 @@ public class NocketStateListener implements INocketListener {
     @Override
     public void onNewToken(TokenTuple token) {
         meta.setToken(token.getToken());
-        meta.setTokenExpireTs(System.currentTimeMillis()/ 1000 + token.getTtl());
+        meta.setTokenExpireTs(System.currentTimeMillis() / 1000 + token.getTtl());
         meta.save();
     }
 
@@ -66,12 +66,10 @@ public class NocketStateListener implements INocketListener {
     public void onOfflineMessages(List<MessageInfo> messages) {
         Bundle bundle = new Bundle();
         ArrayList<String> data = new ArrayList<>();
-        for(MessageInfo message: messages) {
-            if(filter.add(message.getId())) {
-                data.add(message.asJson().toString());
-            }
+        for (MessageInfo message : messages) {
+            data.add(message.asJson().toString());
         }
-        if(!data.isEmpty()) {
+        if (!data.isEmpty()) {
             Message msg = Message.obtain();
             msg.what = Opcode.OFFLINE_MESSAGE;
             bundle.putStringArrayList("messages", data);
@@ -82,14 +80,12 @@ public class NocketStateListener implements INocketListener {
 
     @Override
     public void onRealtimeMessage(MessageInfo message) {
-        if(filter.add(message.getId())) {
-            Message msg = Message.obtain();
-            msg.what = Opcode.REALTIME_MESSAGE;
-            Bundle bundle = new Bundle();
-            bundle.putString("message", message.asJson().toString());
-            msg.setData(bundle);
-            send(msg);
-        }
+        Message msg = Message.obtain();
+        msg.what = Opcode.REALTIME_MESSAGE;
+        Bundle bundle = new Bundle();
+        bundle.putString("message", message.asJson().toString());
+        msg.setData(bundle);
+        send(msg);
     }
 
     @Override
@@ -104,7 +100,7 @@ public class NocketStateListener implements INocketListener {
         Message msg = Message.obtain();
         msg.what = Opcode.TAG_LIST;
         Bundle bundle = new Bundle();
-        ArrayList<String> data=  new ArrayList<>(set);
+        ArrayList<String> data = new ArrayList<>(set);
         bundle.putStringArrayList("tags", data);
         msg.setData(bundle);
         send(msg);
